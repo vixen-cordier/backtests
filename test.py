@@ -8,7 +8,7 @@ class TestChart:
     def __init__(self):
         self.err = 0
         self.chart = Chart()
-        self.chart.data = pd.read_csv('data2.csv', sep=';', parse_dates=['Date']).set_index('Date')
+        self.chart.data = pd.read_csv('data.csv', sep=';', parse_dates=['Date']).set_index('Date')
 
 
     def equal_bool(self, col):
