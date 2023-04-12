@@ -29,7 +29,7 @@ class TestChart:
         for date, (expected, value) in self.chart.data[[f'{col}_exp', col]].iterrows():
             if not np.isclose(value, expected, atol=1e-4, equal_nan=True):
                 err = err + 1
-                print(f"{msg} ERR on {date} -> expected:{self.chart.data.at[date, f'{col}_exp']}, value:{self.chart.data.at[date, f'{col}']}.")
+                print(f"{msg} ERR on {date} -> expected:{expected}, value:{value}.")
         if err == 0:
             print(f"{msg} OK")
         self.err = self.err + err
@@ -60,10 +60,14 @@ if __name__ == '__main__':
     test.equal_float('MoM_Monthly_10')
     test.equal_float('MoM_Monthly_1-5-10')
 
-    print(f"\n{test.err} error(s)") 
+    test.chart.add_rsi(21)
+    test.chart.add_rsi(21, time='Weekly')
+    test.chart.add_rsi(21, time='Monthly')
+    test.equal_float('RSI_Daily_21')
+    test.equal_float('RSI_Weekly_21')
+    test.equal_float('RSI_Monthly_21')
 
+    print(f"\n{test.err} error(s)") 
     print(test.chart.data.columns)
-    print(test.chart.data.head(20))
-    print(test.chart.data.tail(20))
 
 
