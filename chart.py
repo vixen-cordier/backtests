@@ -42,44 +42,51 @@ class Chart:
         """ Add moving average to the graph data (Daily|Weekly|Monthly) """
         data_mm = self.data[self.data[f'Closure_{time}'] == True][['Close']]
         col_mm = f"MM_{time}_{mm}"
-        data_mm[col_mm] = np.nan
+        data_mm[col_mm] = 0
         for i, date in enumerate(data_mm.index[mm-1:]):
             data_mm.at[date, col_mm] = np.mean(data_mm.iloc[i:i+mm]['Close'])
-        self.data[col_mm] = pd.concat([self.data, data_mm[[col_mm]]], axis=1).ffill()[col_mm]
+        self.data[col_mm] = pd.concat([self.data, data_mm[[col_mm]]], axis=1).bfill()[col_mm]
 
 
     def add_mom(self, moms: List[int], time='Daily'):
         """ Add momentum value to the graph data (Daily|Weekly|Monthly) """
         data_mom = self.data[self.data[f'Closure_{time}'] == True][['Close']]
         for mom in moms:
-            data_mom[str(mom)] = np.nan
+            data_mom[str(mom)] = 0
             for i, date in enumerate(data_mom.index[mom:]):
-                data_mom.at[date, str(mom)] = (data_mom.iloc[i+mom]['Close'] / data_mom.iloc[i]['Close'] - 1) * 100
+                # print(f"i={i}, i+mom={i+mom}, date={date}, data_mom.index[i]={data_mom.index[i]}, data_mom.index[i+mom]={data_mom.index[i+mom]}")
+                data_mom.at[date, str(mom)] = data_mom.iloc[i+mom]['Close'] - data_mom.iloc[i]['Close']# - 1) * 100
         col_mom = f"MoM_{time}_{'-'.join([str(mom) for mom in moms])}"
         data_mom[col_mom] = data_mom[[str(mom) for mom in moms]].mean(axis=1)
-        self.data[col_mom] = pd.concat([self.data, data_mom[[col_mom]]], axis=1).ffill()[col_mom]
+        self.data[col_mom] = pd.concat([self.data, data_mom[[col_mom]]], axis=1).bfill()[col_mom]
 
 
     def add_rsi(self, rsi, time='Daily'):
         """ Add RSI index to the graph data (Daily|Weekly|Monthly) """
         data_rsi = self.data[self.data[f'Closure_{time}'] == True][['Close']]
         col_rsi = f'RSI_{time}_{rsi}'
-        data_rsi[col_rsi] = np.nan
+        data_rsi[col_rsi] = 0
         data_rsi['tmp_var'] = 0
         data_rsi['tmp_bull'] = 0
         data_rsi['tmp_bear'] = 0
         # print("build temp columns")
         for i, date in enumerate(data_rsi.index[1:]):
-            # print(f"i={i}", f"date={date}", f"data_rsi.iloc[i+1]['Close']={data_rsi.iloc[i+1]['Close']}", f"data_rsi.iloc[i]['Close']={data_rsi.iloc[i]['Close']}")
             data_rsi.at[date,'tmp_var'] = data_rsi.iloc[i+1]['Close'] - data_rsi.iloc[i]['Close']
+            if i == 0:
+                print(f"date={date}, data_rsi.index[i]={data_rsi.index[i]}, data_rsi.index[i+1]={data_rsi.index[i+1]}, data_rsi.at[date,'tmp_var']={data_rsi.at[date,'tmp_var']}")
             if data_rsi.at[date,'tmp_var'] > 0:
                 data_rsi.at[date,'tmp_bull'] = data_rsi.at[date,'tmp_var']
             else:
                 data_rsi.at[date,'tmp_bear'] = -data_rsi.at[date,'tmp_var']
         # print("build RSI")
-        for i, date in enumerate(data_rsi.index[rsi-1:]):
-            data_rsi.at[date, col_rsi] = 100 - (100 / (1 + np.sum(data_rsi.iloc[i:i+rsi]['tmp_bull']) / np.sum(data_rsi.iloc[i:i+rsi]['tmp_bear'])))
-        self.data[col_rsi] = pd.concat([self.data, data_rsi[[col_rsi]]], axis=1).ffill()[col_rsi]
+        for i, date in enumerate(data_rsi.index[rsi:]):
+            data_rsi.at[date, col_rsi] = 100 - (100 / (1 + np.sum(data_rsi.iloc[i+1:i+rsi+1]['tmp_bull']) / np.sum(data_rsi.iloc[i+1:i+rsi+1]['tmp_bear'])))
+            if i in range (0, 10):
+                print(i)
+                print(f"date={date}, data_rsi.index[i+1]={data_rsi.index[i+1]}, data_rsi.index[i+rsi]={data_rsi.index[i+rsi]}")
+                print(f"date={date}, np.sum(data_rsi.iloc[i+1:i+rsi+1]['tmp_bull'])={np.sum(data_rsi.iloc[i+1:i+rsi+1]['tmp_bull'])}, np.sum(data_rsi.iloc[i+1:i+rsi+1]['tmp_bear'])={np.sum(data_rsi.iloc[i+1:i+rsi+1]['tmp_bear'])}")
+                print(f"date={date}, data_rsi.at[date, col_rsi]={data_rsi.at[date, col_rsi]}")
+        self.data[col_rsi] = pd.concat([self.data, data_rsi[[col_rsi]]], axis=1).bfill()[col_rsi]
         # print(data_rsi.tail(60))
 
 
