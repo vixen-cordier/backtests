@@ -10,34 +10,24 @@ class TestChart:
         self.err_cnt = 0
         self.err_lib = ""
         self.chart = Chart()
-        # self.chart.data = pd.read_csv('dataTradingView.csv', sep=';', parse_dates=['Date'], date_parser=lambda x: datetime.strptime(x, '%d/%m/%Y')).set_index('Date')
-        self.chart.data = pd.read_csv('dataTradingView.csv', sep=';')#.astype({'Date': 'datetime64[ns]'}).sort_values('Date').set_index('Date')
+        self.chart.data = pd.read_csv('dataTradingView.csv', sep=';')
         self.chart.data['Date'] = pd.to_datetime(self.chart.data['Date'], format='%d/%m/%Y')
         self.chart.data.set_index('Date', inplace=True)
         print('index:', self.chart.data.index)
         print('columns:', self.chart.data.columns)
 
-    def equal_bool(self, col):
+    def equal(self, col, type: type):
         err = 0
         msg = f"Equality test on {col} ... "
         for date, (expected, value) in self.chart.data[[f'{col}_exp', col]].iterrows():
-            if expected != value:
+            if type is bool and expected == value:
+                continue
+            elif type is float and np.isclose(value, expected, atol=1e-4, equal_nan=True):
+                continue
+            else:
                 err = err + 1
-                # print(f"{msg} ERR on index {idx} -> \t expected:{self.chart.data.iloc[idx][f'{col}_exp']} \t value:{self.chart.data.iloc[idx][f'{col}']}.")
-                print(f"{msg} ERR on {date.strftime('%m/%d/%Y')} -> expected:{expected}, value:{value}.")
+                print(f"{msg} \t {type} \t ERR on {date.strftime('%m/%d/%Y')} -> expected:{expected}, value:{value}.")
         
-        self.err_lib += f"{msg} {'OK' if err == 0 else f'{err} errors'}\n"
-        self.err_cnt += err
-
-
-    def equal_float(self, col):
-        err = 0
-        msg = f"Equality test on {col} ... "
-        for date, (expected, value) in self.chart.data[[f'{col}_exp', col]].iterrows():
-            if not np.isclose(value, expected, atol=1e-4, equal_nan=True):
-                err = err + 1
-                print(f"{msg} ERR on {date.strftime('%m/%d/%Y')} -> expected:{expected}, value:{value}.")
-
         self.err_lib += f"{msg} {'OK' if err == 0 else f'{err} errors'}\n"
         self.err_cnt += err
 
@@ -47,10 +37,9 @@ if __name__ == '__main__':
     test = TestChart()
 
     test.chart.set_flag()
-    # test.equal_bool('Closure_Daily')
-    # test.equal_bool('Closure_Weekly')
-    # test.equal_bool('Closure_Monthly')
-    print(test.chart.data.tail(50))
+    # test.equal('Closure_Daily', bool)
+    # test.equal('Closure_Weekly', bool)
+    # test.equal('Closure_Monthly', bool)
 
     test.chart.add_mm(20)
     test.chart.add_mm(20, time='Weekly')
@@ -67,16 +56,16 @@ if __name__ == '__main__':
 
 
     test.chart.data.replace(0, np.nan, inplace=True)
-    test.equal_float('MM_Daily_20')
-    test.equal_float('MM_Weekly_20')
-    test.equal_float('MM_Monthly_20')
-    test.equal_float('MoM_Daily_10')
-    test.equal_float('MoM_Weekly_10')
-    test.equal_float('MoM_Monthly_10')
-    # test.equal_float('MoM_Monthly_1-5-10')
-    # test.equal_float('RSI_Daily_21')
-    # test.equal_float('RSI_Weekly_21')
-    # test.equal_float('RSI_Monthly_21')
+    test.equal('MM_Daily_20', float)
+    test.equal('MM_Weekly_20', float)
+    test.equal('MM_Monthly_20', float)
+    test.equal('MoM_Daily_10', float)
+    test.equal('MoM_Weekly_10', float)
+    test.equal('MoM_Monthly_10', float)
+    # test.equal('MoM_Monthly_1-5-10', float)
+    # test.equal('RSI_Daily_21', float)
+    # test.equal('RSI_Weekly_21', float)
+    # test.equal('RSI_Monthly_21', float)
 
     print(f"\n{test.err_lib}\n{test.err_cnt} error(s)") 
     print(test.chart.data.columns)
