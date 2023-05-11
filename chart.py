@@ -44,6 +44,7 @@ class Chart:
         col_mm = f"MM_{time}_{mm}"
         data_mm[col_mm] = 0
         for i, date in enumerate(data_mm.index[mm-1:]):
+            # print(data_mm.iloc[i:i+mm]['Close'])
             data_mm.at[date, col_mm] = np.mean(data_mm.iloc[i:i+mm]['Close'])
         self.data[col_mm] = pd.concat([self.data, data_mm[[col_mm]]], axis=1).bfill()[col_mm]
 
