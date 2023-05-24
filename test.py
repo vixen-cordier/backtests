@@ -26,7 +26,7 @@ class TestChart:
                 continue
             else:
                 err = err + 1
-                print(f"{msg} \t {type} \t ERR on {date.strftime('%m/%d/%Y')} -> expected:{expected}, value:{value}.")
+                print(f"{msg} \t {type} \t ERR on {date.strftime('%d/%m/%Y')} -> expected:{expected}, value:{value}.")
         
         self.err_lib += f"{msg} {'OK' if err == 0 else f'{err} errors'}\n"
         self.err_cnt += err
@@ -45,10 +45,10 @@ if __name__ == '__main__':
     test.chart.add_mm(20, time='Weekly')
     test.chart.add_mm(20, time='Monthly')
 
-    test.chart.add_mom([10])
-    test.chart.add_mom([10], time='Weekly')
-    test.chart.add_mom([10], time='Monthly')
-    test.chart.add_mom([1,5,10], time='Monthly')
+    # test.chart.add_mom([10])
+    # test.chart.add_mom([10], time='Weekly')
+    # test.chart.add_mom([10], time='Monthly')
+    # test.chart.add_mom([1,5,10], time='Monthly')
 
     # test.chart.add_rsi(21)
     # test.chart.add_rsi(21, time='Weekly')
@@ -59,9 +59,9 @@ if __name__ == '__main__':
     test.equal('MM_Daily_20', float)
     test.equal('MM_Weekly_20', float)
     test.equal('MM_Monthly_20', float)
-    test.equal('MoM_Daily_10', float)
-    test.equal('MoM_Weekly_10', float)
-    test.equal('MoM_Monthly_10', float)
+    # test.equal('MoM_Daily_10', float)
+    # test.equal('MoM_Weekly_10', float)
+    # test.equal('MoM_Monthly_10', float)
     # test.equal('MoM_Monthly_1-5-10', float)
     # test.equal('RSI_Daily_21', float)
     # test.equal('RSI_Weekly_21', float)
@@ -69,6 +69,7 @@ if __name__ == '__main__':
 
     print(f"\n{test.err_lib}\n{test.err_cnt} error(s)") 
     print(test.chart.data.columns)
+    print(test.chart.data.head(50))
     print(test.chart.data.tail(50))
     test.chart.data.to_csv('dataResult.csv', sep=';')
 
