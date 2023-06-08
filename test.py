@@ -1,4 +1,4 @@
-from chart import Chart
+from api import Chart
 import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
 import numpy as np
