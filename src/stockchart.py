@@ -2,23 +2,21 @@ from typing import List
 import yfinance as yf
 import pandas as pd
 import numpy as np
+from datetime import datetime
 
 
-class Chart:
-    def __init__(self):
-        """ Initialisation of graphic """
-        self.ticker: str
-        self.data: pd.DataFrame
+class StockChart:
+    def __init__(self, ticker='SPY'):
+        """ Initialisation of graphic by fetching daily data from yahoo finance API"""
+        self.data: pd.DataFrame = yf.Ticker(ticker).history(period='max')[['Close']]
+        print(f"{ticker}:  {self.data.index[0].strftime('%Y-%m-%d')} --> {self.data.index[-1].strftime('%Y-%m-%d')}")
 
 
-    def fetch_yf(self, ticker):
-        """ Fetch daily data from yahoo finance API"""
-        self.ticker = ticker
-        self.data = yf.Ticker(self.ticker).history(period="max")[['Close']].reset_index()
-        print(f"{self.ticker}:  {self.data.iloc[0]['Date'].strftime('%Y-%m-%d')} --> {self.data.iloc[-1]['Date'].strftime('%Y-%m-%d')}")
+    def getPrice(self, date: datetime):
+        return self.data[self.data.index.strftime('%Y-%m-%d') == date.strftime('%Y-%m-%d')]['Close'].values[0]
+    
 
-
-    def set_flag(self):
+    def setFlag(self):
         """ Flags end of Week and end of Month """
         self.data['Closure_Daily'] = False
         self.data['Closure_Weekly'] = False
@@ -38,7 +36,7 @@ class Chart:
         self.data.at[last_date, 'Closure_Monthly'] = True 
 
 
-    def add_mm(self, mm: int, time='Daily'):
+    def addMM(self, mm: int, time='Daily'):
         """ Add moving average to the graph data (Daily|Weekly|Monthly) """
         data_mm = self.data[self.data[f'Closure_{time}'] == True][['Close']]
         col_mm = f"MM_{time}_{mm}"
@@ -49,7 +47,7 @@ class Chart:
         self.data[col_mm] = pd.concat([self.data, data_mm[[col_mm]]], axis=1).bfill()[col_mm]
 
 
-    def add_mom(self, moms: List[int], time='Daily'):
+    def addMoM(self, moms: List[int], time='Daily'):
         """ Add momentum value to the graph data (Daily|Weekly|Monthly) """
         data_mom = self.data[self.data[f'Closure_{time}'] == True][['Close']]
         for mom in moms:
@@ -62,7 +60,7 @@ class Chart:
         self.data[col_mom] = pd.concat([self.data, data_mom[[col_mom]]], axis=1).bfill()[col_mom]
 
 
-    def add_rsi(self, rsi, time='Daily'):
+    def addRSI(self, rsi, time='Daily'):
         """ Add RSI index to the graph data (Daily|Weekly|Monthly) """
         data_rsi = self.data[self.data[f'Closure_{time}'] == True][['Close']]
         col_rsi = f'RSI_{time}_{rsi}'
