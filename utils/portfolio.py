@@ -3,8 +3,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 
-from src.stockchart import StockChart
-
+from utils.stockchart import StockChart
 
 
 class Portfolio:
@@ -37,24 +36,29 @@ class _Statistics:
             index=pd.date_range(start=range_date['start'], end=range_date['end']), 
             columns=pd.MultiIndex(levels=[[],[]], codes=[[],[]], names=[u'ticker', u'metric'])
         )
-        print(self._data)
+
         for ticker in np.unique(portfolio.operations['Ticker']):
-            print(ticker)
-            self._data[ticker, 'Close'] = portfolio.charts[ticker].data.loc[range_date['start']:range_date['end']]
+            df_ticker = pd.DataFrame(index=self._data.index)
+            df_operation = portfolio.operations[portfolio.operations['Ticker'] == ticker]
             
             position, invested = pd.Series(dtype=float), pd.Series(dtype=float)
-            for date in self._data.index:
-                position[date] = np.sum(portfolio.operations[portfolio.operations['Date'] <= datetime(date.year, date.month, date.day)]['Quantity'])
-                invested[date] = np.sum(portfolio.operations[portfolio.operations['Date'] <= datetime(date.year, date.month, date.day)]['Operation'])
+            for date in df_ticker.index:
+                position[date] = np.sum(df_operation[df_operation['Date'] <= date]['Quantity'])
+                invested[date] = np.sum(df_operation[df_operation['Date'] <= date]['Operation'])
                 
-            self._data = pd.concat([self._data, pd.DataFrame({
-                (ticker, 'Position'): position,
-                (ticker, 'Invested'): position,
+            df_ticker = pd.concat([df_ticker, pd.DataFrame({
+                'Position': position,
+                'Invested': invested,
             })], axis=1)
             
-            self._data[ticker, 'Value'] = self._data[ticker, 'Close'] * self._data[ticker, 'Position']
-            
-        # self._buildChart()
+            df_ticker = df_ticker.join(portfolio.charts[ticker].data).ffill()
+            df_ticker['Value'] = df_ticker['Close'] * df_ticker['Position']
+
+            for column in df_ticker.columns:
+                self._data[ticker, column] = df_ticker[column]  
+        
+                 
+        self._buildChart()
         # self._setBalance()
         # self.deposit: float
         # self.fees: float
@@ -72,6 +76,4 @@ class _Statistics:
         
         
     def _buildChart(self):
-        self.chart = pd.DataFrame(index=pd.date_range(start=self._range_date['start'], end=self._range_date['end']))
-        for ticker in self._data.keys():
-            self.chart = pd.concat(self.chart, self._data[ticker])
+        self.chart: pd.Series = self._data.loc[:, pd.IndexSlice[:, 'Value']].sum(axis=1)

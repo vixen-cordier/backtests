@@ -1,3 +1,4 @@
 yfinance
 plotly
 dash
+dash_bootstrap_components

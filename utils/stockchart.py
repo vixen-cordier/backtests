@@ -8,12 +8,12 @@ from datetime import datetime
 class StockChart:
     def __init__(self, ticker='SPY'):
         """ Initialisation of graphic by fetching daily data from yahoo finance API"""
-        self.data: pd.DataFrame = yf.Ticker(ticker).history(period='max')[['Close']]
+        self.data: pd.DataFrame = yf.Ticker(ticker).history(period='max')[['Close']].tz_localize(None)
         print(f"{ticker}:  {self.data.index[0].strftime('%Y-%m-%d')} --> {self.data.index[-1].strftime('%Y-%m-%d')}")
 
 
     def getPrice(self, date: datetime):
-        return self.data[self.data.index.strftime('%Y-%m-%d') == date.strftime('%Y-%m-%d')]['Close'].values[0]
+        return self.data[self.data.index == date]['Close'].values[0]
     
 
     def setFlag(self):
