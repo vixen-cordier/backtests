@@ -18,7 +18,7 @@ class Portfolio:
         if ticker not in self.charts.keys():
             self.charts[ticker] = StockChart(ticker)
         fees = 0
-        price = self.charts[ticker].getPrice(date)
+        price = self.charts[ticker].get_price(date)
         operation = price*quantity+fees
         self.operations.loc[len(self.operations)] = [date, ticker, price, quantity, fees, operation, description] 
 
@@ -58,7 +58,7 @@ class _Statistics:
                 self._data[ticker, column] = df_ticker[column]  
         
                  
-        self._buildChart()
+        self._build_chart()
         # self._setBalance()
         # self.deposit: float
         # self.fees: float
@@ -75,5 +75,5 @@ class _Statistics:
         # self.max_drawdown_daterange: str
         
         
-    def _buildChart(self):
+    def _build_chart(self):
         self.chart: pd.Series = self._data.loc[:, pd.IndexSlice[:, 'Value']].sum(axis=1)

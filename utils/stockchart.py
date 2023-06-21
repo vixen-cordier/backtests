@@ -12,11 +12,11 @@ class StockChart:
         print(f"{ticker}:  {self.data.index[0].strftime('%Y-%m-%d')} --> {self.data.index[-1].strftime('%Y-%m-%d')}")
 
 
-    def getPrice(self, date: datetime):
+    def get_price(self, date: datetime):
         return self.data[self.data.index == date]['Close'].values[0]
     
 
-    def setFlag(self):
+    def set_flag(self):
         """ Flags end of Week and end of Month """
         self.data['Closure_Daily'] = False
         self.data['Closure_Weekly'] = False
@@ -36,7 +36,7 @@ class StockChart:
         self.data.at[last_date, 'Closure_Monthly'] = True 
 
 
-    def addMM(self, mm: int, time='Daily'):
+    def add_mm(self, mm: int, time='Daily'):
         """ Add moving average to the graph data (Daily|Weekly|Monthly) """
         data_mm = self.data[self.data[f'Closure_{time}'] == True][['Close']]
         col_mm = f"MM_{time}_{mm}"
@@ -47,7 +47,7 @@ class StockChart:
         self.data[col_mm] = pd.concat([self.data, data_mm[[col_mm]]], axis=1).bfill()[col_mm]
 
 
-    def addMoM(self, moms: List[int], time='Daily'):
+    def add_mom(self, moms: List[int], time='Daily'):
         """ Add momentum value to the graph data (Daily|Weekly|Monthly) """
         data_mom = self.data[self.data[f'Closure_{time}'] == True][['Close']]
         for mom in moms:
@@ -60,7 +60,7 @@ class StockChart:
         self.data[col_mom] = pd.concat([self.data, data_mom[[col_mom]]], axis=1).bfill()[col_mom]
 
 
-    def addRSI(self, rsi, time='Daily'):
+    def add_rsi(self, rsi, time='Daily'):
         """ Add RSI index to the graph data (Daily|Weekly|Monthly) """
         data_rsi = self.data[self.data[f'Closure_{time}'] == True][['Close']]
         col_rsi = f'RSI_{time}_{rsi}'
