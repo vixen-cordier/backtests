@@ -10,17 +10,17 @@ class Portfolio:
     def __init__(self, name):
         """ Initialisation of portfolio """
         self.name: str = name
-        self.operations = pd.DataFrame(columns=['Date', 'Ticker', 'Price', 'Quantity', 'Fees', 'Operation'])
+        self.operations = pd.DataFrame(columns=['Date', 'Ticker', 'Price', 'Quantity', 'Fees', 'Operation', 'Description'])
         self.charts: Dict[str, StockChart] = {}
 
-    def buy(self, date: datetime, ticker: str, quantity: float):
+    def buy(self, date: datetime, ticker: str, quantity: float, description = "buy"):
         """ Add operation in operations Dataframe """
         if ticker not in self.charts.keys():
             self.charts[ticker] = StockChart(ticker)
         fees = 0
         price = self.charts[ticker].getPrice(date)
         operation = price*quantity+fees
-        self.operations.loc[len(self.operations)] = [date, ticker, price, quantity, fees, operation] 
+        self.operations.loc[len(self.operations)] = [date, ticker, price, quantity, fees, operation, description] 
 
     def stats(self):
         return _Statistics(self)
