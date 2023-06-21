@@ -1,5 +1,4 @@
-import dash
-from dash import Dash, html, dcc, callback, Output, Input
+from dash import dash, Dash, html, dcc, callback, Output, Input
 import dash_bootstrap_components as dbc
 
 from datetime import datetime 
@@ -11,22 +10,21 @@ from utils.portfolio import Portfolio
     
 # Layout construction
 # =============================
-app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.CYBORG])
+
 app.layout = html.Div([
     dbc.Navbar(
-        dbc.Collapse(
-            dbc.Row([
-                dbc.Col(dbc.Input(type="search", placeholder="Search")),
-                dbc.Col(
-                    dbc.Button("Search", color="primary", className="ms-2", n_clicks=0),
-                    width="auto"
-                )],
-                className="g-0 ms-auto flex-nowrap mt-3 mt-md-0",
-                align="center",
+        dbc.Container([
+            html.A(
+                dbc.Row([
+                    dbc.Col(html.Img(src='assets/C.png', height="30px")),
+                    dbc.Col(dbc.NavbarBrand("Portfolio Backtest", className="ms-2")),
+                ]),
+                href="/home",
+                style={"textDecoration": "none"},
             ),
-            navbar=True,
-            is_open=False,
-        ),
+            dbc.NavbarToggler(id="navbar-toggler", n_clicks=0),
+        ]),
         color="dark",
         dark=True,
     ),
