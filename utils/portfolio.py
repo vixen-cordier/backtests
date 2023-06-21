@@ -13,6 +13,7 @@ class Portfolio:
         self.operations = pd.DataFrame(columns=['Date', 'Ticker', 'Price', 'Quantity', 'Fees', 'Operation', 'Description'])
         self.charts: Dict[str, StockChart] = {}
 
+
     def buy(self, date: datetime, ticker: str, quantity: float, description = "buy"):
         """ Add operation in operations Dataframe """
         if ticker not in self.charts.keys():
@@ -21,6 +22,7 @@ class Portfolio:
         price = self.charts[ticker].get_price(date)
         operation = price*quantity+fees
         self.operations.loc[len(self.operations)] = [date, ticker, price, quantity, fees, operation, description] 
+
 
     def stats(self):
         return _Statistics(self)
