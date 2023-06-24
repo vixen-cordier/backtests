@@ -11,8 +11,13 @@ class StockChart:
         self.data: pd.DataFrame = yf.Ticker(ticker).history(period='max')[['Close']].tz_localize(None)
         print(f"{ticker}:  {self.data.index[0].strftime('%Y-%m-%d')} --> {self.data.index[-1].strftime('%Y-%m-%d')}")
 
-
-    def get_price(self, date: datetime):
+    def get_oldest_date(self) -> datetime:
+        return self.data.index[0]
+    
+    def get_youngest_date(self) -> datetime:
+        return self.data.index[-1]
+    
+    def get_price(self, date: datetime) -> float:
         return self.data[self.data.index == date]['Close'].values[0]
     
 

@@ -3,15 +3,15 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 
-from utils.stockchart import StockChart
+from classes.stockchart import StockChart
 
 
 class Portfolio:
-    def __init__(self, name):
+    def __init__(self, name, assets=""):
         """ Initialisation of portfolio """
         self.name: str = name
         self.operations = pd.DataFrame(columns=['Date', 'Ticker', 'Price', 'Quantity', 'Fees', 'Operation', 'Description'])
-        self.charts: Dict[str, StockChart] = {}
+        self.charts = { ticker: StockChart(ticker) for ticker in assets.split(" ") }
 
 
     def buy(self, date: datetime, ticker: str, quantity: float, description = "buy"):
@@ -22,13 +22,21 @@ class Portfolio:
         price = self.charts[ticker].get_price(date)
         operation = price*quantity+fees
         self.operations.loc[len(self.operations)] = [date, ticker, price, quantity, fees, operation, description] 
+    
+    def sell(self, date: datetime, ticker: str, quantity: float, description = "sell"):
+        self.buy(date=date, ticker=ticker, quantity=-quantity, description=description)
 
+    def get_oldest_date(self) -> datetime:
+        return max( chart.get_oldest_date() for chart in self.charts.values() )
+    
+    def get_youngest_date(self) -> datetime:
+        return min( chart.get_youngest_date() for chart in self.charts.values() )
 
     def stats(self):
-        return _Statistics(self)
+        return Statistics(self)
         
 
-class _Statistics:
+class Statistics:
     def __init__(self, portfolio: Portfolio):
         range_date = { 
             'start': portfolio.operations.sort_values(by='Date').iloc[0]['Date'].strftime('%Y-%m-%d'),

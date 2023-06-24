@@ -1,0 +1,21 @@
+{
+    "name": "",
+    "date": "",
+    "strategies": [
+        {
+            "percent": 0,
+            "strategy": {
+                "type": "ALLIN",
+                "assets": ""
+            }
+        },
+        {
+            "percent": 0,
+            "strategy": {
+                "type": "DCA",
+                "assets": "",
+                "freq": ""
+            }
+        }
+    ]
+}
