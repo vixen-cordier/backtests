@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import List
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -7,24 +7,32 @@ from classes.stockchart import StockChart
 
 
 class Portfolio:
-    def __init__(self, name, assets=""):
+    def __init__(self, name: str, initial_cash: int, tickers: List[str]):
         """ Initialisation of portfolio """
-        self.name: str = name
-        self.operations = pd.DataFrame(columns=['Date', 'Ticker', 'Price', 'Quantity', 'Fees', 'Operation', 'Description'])
-        self.charts = { ticker: StockChart(ticker) for ticker in assets.split(" ") }
+        self.name = name
+        self.cash = initial_cash
+        self.operations = pd.DataFrame(columns=['Date', 'Ticker', 'Price', 'Quantity', 'Fees', 'Amount', 'Description'])
+        self.charts = { ticker: StockChart(ticker) for ticker in tickers }
 
 
-    def buy(self, date: datetime, ticker: str, quantity: float, description = "buy"):
-        """ Add operation in operations Dataframe """
-        if ticker not in self.charts.keys():
-            self.charts[ticker] = StockChart(ticker)
-        fees = 0
+    def buy(self, date: datetime, ticker: str, amount: float, description = "buy"):
+        fees = 0.0
         price = self.charts[ticker].get_price(date)
-        operation = price*quantity+fees
-        self.operations.loc[len(self.operations)] = [date, ticker, price, quantity, fees, operation, description] 
+        quantity = (amount-fees)/price
+        self.operations.loc[len(self.operations)] = [date, ticker, price, quantity, fees, amount, description]
+        self.cash -= amount 
     
-    def sell(self, date: datetime, ticker: str, quantity: float, description = "sell"):
-        self.buy(date=date, ticker=ticker, quantity=-quantity, description=description)
+    def sell(self, date: datetime, ticker: str, amount: float, description = "sell"):
+        self.buy(date, ticker, -amount, description=description)
+
+    def deposit(self, date: datetime, additional_cash: int, description = "deposit"):
+        fees = 0.0
+        amount = additional_cash+fees
+        self.operations.loc[len(self.operations)] = [date, "cash", 1, additional_cash, fees, amount, description]
+        self.cash += additional_cash 
+    
+    def withdraw(self, date: datetime, reduction_cash: int, description = "withdraw"):
+        self.deposit(self, date, -reduction_cash, description=description)
 
     def get_oldest_date(self) -> datetime:
         return max( chart.get_oldest_date() for chart in self.charts.values() )
@@ -54,7 +62,7 @@ class Statistics:
             position, invested = pd.Series(dtype=float), pd.Series(dtype=float)
             for date in df_ticker.index:
                 position[date] = np.sum(df_operation[df_operation['Date'] <= date]['Quantity'])
-                invested[date] = np.sum(df_operation[df_operation['Date'] <= date]['Operation'])
+                invested[date] = np.sum(df_operation[df_operation['Date'] <= date]['Amount'])
                 
             df_ticker = pd.concat([df_ticker, pd.DataFrame({
                 'Position': position,

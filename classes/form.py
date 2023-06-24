@@ -3,18 +3,26 @@ import json
 import datetime as dt
 from typing import List
 
+from classes.portfolio import Portfolio
 from classes.strategies import Strategy, StrategyDCA, StrategyALLIN 
 
 CURDIR = os.getcwd()
 
 
 class Form():
-    def __init__(self, name, 
+    def __init__(self, name, initial_cash,
                  date=dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 
                  strategies: List[tuple[int, Strategy | StrategyDCA | StrategyALLIN]] = []):
         self.name = name
         self.date = date
+        self.initial_cash = initial_cash
         self.strategies = strategies
+        self.portfolio = Portfolio(
+            name, initial_cash, 
+            tickers = [ ticker for _, strategy in strategies for ticker in strategy.assets ]
+        )
+
+
     
     
     def to_json(self) -> dict:
@@ -30,11 +38,11 @@ class Form():
 
     @staticmethod
     def from_json(json: dict):
-        return Form(json['name'], json['date'], strategies=
-            [(
+        return Form(json['name'], json['date'], strategies = [
+            (
                 strategy_json['percent'],
                 Strategy.from_json(strategy_json['strategy'])
-            ) for strategy_json in json['strategies']]
+            ) for strategy_json in json['strategies'] ]
         )
 
 

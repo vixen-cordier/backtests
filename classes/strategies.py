@@ -1,9 +1,10 @@
+from typing import Dict
+
 from classes.portfolio import Portfolio
 
 
 class Strategy():
-    def __init__(self):
-        self.type = ""
+    type = ""
 
     def to_json(self):
         return {}
@@ -22,16 +23,20 @@ class Strategy():
 class StrategyALLIN(Strategy):
     type = "ALLIN"
 
-    def __init__(self, assets=""):
+    def __init__(self, assets: Dict[str, int] = {}):
         self.assets = assets
 
     def to_json(self):
         return {
             "type": self.type,
-            "assets": self.assets,
+            "assets": self.assets
         }
     
-    # def apply(self, portfolio: Portfolio):
+    def apply(self, portfolio: Portfolio):
+        date = portfolio.get_oldest_date()
+        for ticker, percent in self.assets.items():
+            portfolio.buy(date, ticker, portfolio.cash*percent/100, description="buy ALLIN")
+
 
 
 
@@ -40,13 +45,22 @@ class StrategyALLIN(Strategy):
 class StrategyDCA(Strategy):
     type = "DCA"
 
-    def __init__(self, assets="", freq=""):
+    def __init__(self, assets: Dict[str, int] = {}, freq="", inflow=0):
         self.assets = assets
         self.freq = freq
+        self.inflow = inflow
 
     def to_json(self):
         return {
             "type": self.type,
             "assets": self.assets,
-            "freq": self.freq
+            "freq": self.freq,
+            "inflow": self.inflow
         }
+        
+    def apply(self, portfolio: Portfolio):
+        date = portfolio.get_oldest_date()
+        #     portfolio.deposit(date, self.inflow, description="deposit DCA")
+        # for ticker, percent in self.assets.items():
+        #     portfolio.buy(date, ticker, portfolio.cash*percent/100, description="buy DCA")
+
