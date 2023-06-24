@@ -47,19 +47,11 @@ class Form():
 
 
 
-def to_json_list(forms: List[Form]) -> List[dict]:
-    return [ form.to_json() for form in forms ]
-
-
-def from_json_list(json_list: List[dict]) -> List[Form]:
-    return [ Form.from_json(json) for json in json_list ]
-
-
 def read_forms() -> List[Form]:
     forms: List[Form] = []
     try:
         with open(f"{CURDIR}/forms.json", 'r') as file:
-            forms = from_json_list(json.loads(file.read()))
+            forms = [ Form.from_json(json) for json in json.loads(file.read()) ]
     except Exception as error:
         print(error)
     return forms
@@ -71,7 +63,7 @@ def save_forms(forms: List[Form], backup=False):
             os.rename(f"{CURDIR}/forms.json", 
                     f"{CURDIR}/.old/forms/forms.{dt.datetime.now().strftime('%Y-%m-%d.%H:%M:%S')}.json")
         with open(f"{CURDIR}/forms.json", 'w') as file:
-            file.write(json.dumps(to_json_list(forms)))
+            file.write(json.dumps([ form.to_json() for form in forms ]))
     except Exception as error:
         print(error)
 
