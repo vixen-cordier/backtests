@@ -1,0 +1,28 @@
+[
+    {
+        "name": "SPY",
+        "initial_cash": 10000,
+        "strategies": [
+            {
+                "percent": 100,
+                "strategy": {
+                    "type": "ALLIN",
+                    "assets": { "SPY": 100 }
+                }
+            }
+        ]
+    },
+    {
+        "name": "QQQ",
+        "initial_cash": 10000,
+        "strategies": [
+            {
+                "percent": 100,
+                "strategy": {
+                    "type": "ALLIN",
+                    "assets": { "QQQ": 100 }
+                }
+            }
+        ]
+    }
+]
