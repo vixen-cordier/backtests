@@ -2,7 +2,7 @@ from typing import List
 import yfinance as yf
 import pandas as pd
 import numpy as np
-from datetime import datetime
+import datetime
 
 
 class StockChart:
@@ -18,6 +18,9 @@ class StockChart:
         return self.data.index[-1]
     
     def get_price(self, date: datetime) -> float:
+        while date not in self.data.index:
+            date -= datetime.timedelta(days=1)
+        print(date)
         return self.data[self.data.index == date]['Close'].values[0]
     
 

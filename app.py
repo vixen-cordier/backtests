@@ -1,4 +1,6 @@
 import streamlit as st
+import datetime
+import pandas as pd
 from typing import List
 st.set_page_config(layout="wide", page_title="Portfolio Backtest")
 import plotly.graph_objects as go
@@ -28,7 +30,7 @@ with st.sidebar:
     st.title("Portfolios")
     st.write(" ")
 
-    new_form_button = st.button("Create new portfolio", type="primary", use_container_width=True)
+    new_form_button = st.button("Create new portfolio", type="primary")#, use_container_width=True)
     st.write(" ")
     if new_form_button:
         st.write("Go to Form Page !")
@@ -46,14 +48,22 @@ with st.sidebar:
         #     print("Delete:", form.name)
 
 
-st.title(" vs ".join(form.name for form in forms_checked))
-date_range = st.slider("Date slider to filter data", value=(start_date, ended_date), format="YYYY-MM-DD")
+if forms_checked:
+    st.title(" vs ".join(form.name for form in forms_checked))
+    start_date = max( chart.get_oldest_date() for form in forms_checked for chart in form.portfolio.charts.values())
+    end_date = min( chart.get_youngest_date() for form in forms_checked for chart in form.portfolio.charts.values())
+    date_range = st.slider("Date slider to filter data", format="YYYY-MM-DD", value=(
+        datetime.datetime(start_date.year, start_date.month, start_date.day),
+        datetime.datetime(end_date.year, end_date.month, end_date.day)
+    ))
+    
 
-fig = go.Figure()
-for form in forms_checked:
-    for _, strategy in form.strategies:
-        strategy.apply(form.portfolio)
-    if not form.portfolio.operations.empty:
-        stats = form.portfolio.stats()
-        fig.add_trace(go.Scatter(x=stats.chart.index, y=stats.chart.values, name=form.name))
-st.plotly_chart(fig) 
+    fig = go.Figure()
+    for form in forms_checked:
+        form.portfolio.filter_by_dates(date_range[0], date_range[1])
+        for _, strategy in form.strategies:
+            strategy.apply(form.portfolio, start_date=date_range[0])
+        if not form.portfolio.operations.empty:
+            stats = form.portfolio.stats()
+            fig.add_trace(go.Scatter(x=stats.chart.index, y=stats.chart.values, name=form.name))
+    st.plotly_chart(fig)

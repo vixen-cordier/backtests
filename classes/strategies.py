@@ -1,5 +1,5 @@
 from typing import Dict
-
+import datetime
 from classes.portfolio import Portfolio
 
 
@@ -32,10 +32,9 @@ class StrategyALLIN(Strategy):
             "assets": self.assets
         }
     
-    def apply(self, portfolio: Portfolio):
-        date = portfolio.get_oldest_date()
+    def apply(self, portfolio: Portfolio, start_date: datetime):
         for ticker, percent in self.assets.items():
-            portfolio.buy(date, ticker, portfolio.cash*percent/100, description="buy ALLIN")
+            portfolio.buy(start_date, ticker, portfolio.cash*percent/100, description="buy ALLIN")
 
 
 
@@ -59,7 +58,7 @@ class StrategyDCA(Strategy):
         }
         
     def apply(self, portfolio: Portfolio):
-        date = portfolio.get_oldest_date()
+        pass
         #     portfolio.deposit(date, self.inflow, description="deposit DCA")
         # for ticker, percent in self.assets.items():
         #     portfolio.buy(date, ticker, portfolio.cash*percent/100, description="buy DCA")
