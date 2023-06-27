@@ -1,9 +1,8 @@
 import streamlit as st
 import datetime
-import pandas as pd
 from typing import List
-st.set_page_config(layout="wide", page_title="Portfolio Backtest")
 import plotly.graph_objects as go
+st.set_page_config(layout="wide", page_title="Portfolio Backtest")
 
 from classes.form import Form, read_forms, save_forms
 # import layouts.form_page as form_p
@@ -13,9 +12,6 @@ from classes.form import Form, read_forms, save_forms
 forms = read_forms()
 forms_checked: List[Form] = []
 
-
-def form_page(form=None):
-    print("Go to Form Page:", form.name if form is not None else "New!")
 
 # st.write("""
 # <style>
@@ -27,6 +23,9 @@ def form_page(form=None):
 
 
 with st.sidebar:
+    
+    st.markdown('---')
+
     st.title("Portfolios")
     st.write(" ")
 
@@ -50,8 +49,8 @@ with st.sidebar:
 
 if forms_checked:
     st.title(" vs ".join(form.name for form in forms_checked))
-    start_date = max( chart.get_oldest_date() for form in forms_checked for chart in form.portfolio.charts.values())
-    end_date = min( chart.get_youngest_date() for form in forms_checked for chart in form.portfolio.charts.values())
+    start_date = max( chart.get_oldest_date() for form in forms_checked for chart in form.portfolio.charts.values() )
+    end_date = min( chart.get_youngest_date() for form in forms_checked for chart in form.portfolio.charts.values() )
     date_range = st.slider("Date slider to filter data", format="YYYY-MM-DD", value=(
         datetime.datetime(start_date.year, start_date.month, start_date.day),
         datetime.datetime(end_date.year, end_date.month, end_date.day)
