@@ -1,6 +1,19 @@
 [
     {
-        "name": "SPY",
+        "name": "A",
+        "initial_cash": 10000,
+        "strategies": [
+            {
+                "percent": 100,
+                "strategy": {
+                    "type": "ALLIN",
+                    "assets": { "SPY": 50, "SPZ": 45, "QQQ": 5 }
+                }
+            }
+        ]
+    },
+    {
+        "name": "B",
         "initial_cash": 10000,
         "strategies": [
             {
@@ -9,17 +22,12 @@
                     "type": "ALLIN",
                     "assets": { "SPY": 100 }
                 }
-            }
-        ]
-    },
-    {
-        "name": "QQQ",
-        "initial_cash": 10000,
-        "strategies": [
+            },
             {
                 "percent": 100,
                 "strategy": {
-                    "type": "ALLIN",
+                    "type": "DCA",
+                    "freq": "Monthly",
                     "assets": { "QQQ": 100 }
                 }
             }

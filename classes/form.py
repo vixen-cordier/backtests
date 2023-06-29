@@ -17,11 +17,26 @@ class Form():
         # self.date = date
         self.initial_cash = initial_cash
         self.strategies = strategies
-        self.portfolio = Portfolio(
-            name, initial_cash, 
-            tickers = [ ticker for _, strategy in strategies for ticker in strategy.assets ]
+        
+        # self.portfolio = Portfolio(
+        #     name, initial_cash, 
+        #     tickers = [ ticker for _, strategy in strategies for ticker in strategy.assets ]
+        # )
+
+
+    @staticmethod
+    def from_json(json: dict):
+        # return Form(json['name'], json['date'], strategies = [
+        return Form(json['name'], json['initial_cash'], strategies = [
+            (
+                strategy_json['percent'],
+                Strategy.from_json(strategy_json['strategy'])
+            ) for strategy_json in json['strategies'] ]
         )
 
+    @staticmethod
+    def empty():
+        return Form("", 0)
 
     
     
@@ -35,17 +50,6 @@ class Form():
                 "strategy": strategy.to_json()
             } for percent, strategy in self.strategies ]
         }
-
-
-    @staticmethod
-    def from_json(json: dict):
-        # return Form(json['name'], json['date'], strategies = [
-        return Form(json['name'], json['initial_cash'], strategies = [
-            (
-                strategy_json['percent'],
-                Strategy.from_json(strategy_json['strategy'])
-            ) for strategy_json in json['strategies'] ]
-        )
 
 
 

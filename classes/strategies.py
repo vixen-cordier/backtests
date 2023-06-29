@@ -1,27 +1,32 @@
+import  enum
 from typing import Dict
 import datetime
 from classes.portfolio import Portfolio
+
+class StrategyType(enum.Enum):
+   ALLIN = 0
+   DCA   = 1
 
 
 class Strategy():
     type = ""
 
-    def to_json(self):
-        return {}
-
     @staticmethod
     def from_json(json):
-        if json['type'] == "ALLIN":
+        if json['type'] == StrategyType.ALLIN.name:
             return StrategyALLIN(assets=json['assets'])
-        elif json['type'] == "DCA":
+        elif json['type'] == StrategyType.DCA.name:
             return StrategyDCA(assets=json['assets'], freq=json['freq'])
         else:
             return Strategy()
+        
+    def to_json(self):
+        return {}
 
 
 
 class StrategyALLIN(Strategy):
-    type = "ALLIN"
+    type = StrategyType.ALLIN.name
 
     def __init__(self, assets: Dict[str, int] = {}):
         self.assets = assets
@@ -39,10 +44,8 @@ class StrategyALLIN(Strategy):
 
 
 
-
-
 class StrategyDCA(Strategy):
-    type = "DCA"
+    type = StrategyType.DCA.name
 
     def __init__(self, assets: Dict[str, int] = {}, freq="", inflow=0):
         self.assets = assets
@@ -57,7 +60,7 @@ class StrategyDCA(Strategy):
             "inflow": self.inflow
         }
         
-    def apply(self, portfolio: Portfolio):
+    def apply(self, portfolio: Portfolio, start_date: datetime):
         pass
         #     portfolio.deposit(date, self.inflow, description="deposit DCA")
         # for ticker, percent in self.assets.items():
