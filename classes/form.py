@@ -13,6 +13,7 @@ class Form():
     def __init__(self, name, initial_cash,
                 #  date=dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 
                  strategies: List[tuple[int, Strategy | StrategyDCA | StrategyALLIN]] = []):
+        self.id = 
         self.name = name
         # self.date = date
         self.initial_cash = initial_cash
