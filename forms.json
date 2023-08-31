@@ -1,7 +1,6 @@
 [
     {
         "name": "A",
-        "initial_cash": 10000,
         "strategies": [
             {
                 "percent": 100,
@@ -14,7 +13,6 @@
     },
     {
         "name": "B",
-        "initial_cash": 10000,
         "strategies": [
             {
                 "percent": 100,

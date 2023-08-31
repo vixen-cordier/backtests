@@ -10,17 +10,15 @@ CURDIR = os.getcwd()
 
 
 class Form():
-    def __init__(self, name, initial_cash,
+    def __init__(self, name,
                 #  date=dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 
                  strategies: List[tuple[int, Strategy | StrategyDCA | StrategyALLIN]] = []):
-        self.id = 
         self.name = name
         # self.date = date
-        self.initial_cash = initial_cash
         self.strategies = strategies
         
         # self.portfolio = Portfolio(
-        #     name, initial_cash, 
+        #     name, 
         #     tickers = [ ticker for _, strategy in strategies for ticker in strategy.assets ]
         # )
 
@@ -28,7 +26,7 @@ class Form():
     @staticmethod
     def from_json(json: dict):
         # return Form(json['name'], json['date'], strategies = [
-        return Form(json['name'], json['initial_cash'], strategies = [
+        return Form(json['name'], strategies = [
             (
                 strategy_json['percent'],
                 Strategy.from_json(strategy_json['strategy'])
@@ -45,7 +43,6 @@ class Form():
         return {
             "name": self.name,
             # "date": self.date,
-            "initial_cash": self.initial_cash,
             "strategies": [ {
                 "percent": percent,
                 "strategy": strategy.to_json()

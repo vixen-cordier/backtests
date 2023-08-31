@@ -1,7 +1,7 @@
 from typing import List
 import pandas as pd
 import numpy as np
-from datetime import datetime
+import datetime as dt
 from classes.stockchart import StockChart
 
 
@@ -14,46 +14,46 @@ class Portfolio:
         self.charts = { ticker: StockChart(ticker) for ticker in tickers }
 
 
-    def buy(self, date: datetime, ticker: str, amount: float, description = "buy"):
+    def buy(self, date: dt.datetime, ticker: str, amount: float, description = "buy"):
         fees = 0.0
         price = self.charts[ticker].get_price(date)
         quantity = (amount-fees)/price
         self.operations.loc[len(self.operations)] = [date, ticker, price, quantity, fees, amount, description]
         self.cash -= amount 
     
-    def sell(self, date: datetime, ticker: str, amount: float, description = "sell"):
+    def sell(self, date: dt.datetime, ticker: str, amount: float, description = "sell"):
         self.buy(date, ticker, -amount, description=description)
 
-    def deposit(self, date: datetime, additional_cash: int, description = "deposit"):
+    def deposit(self, date: dt.datetime, additional_cash: int, description = "deposit"):
         fees = 0.0
         amount = additional_cash+fees
         self.operations.loc[len(self.operations)] = [date, "cash", 1, additional_cash, fees, amount, description]
         self.cash += additional_cash 
     
-    def withdraw(self, date: datetime, reduction_cash: int, description = "withdraw"):
+    def withdraw(self, date: dt.datetime, reduction_cash: int, description = "withdraw"):
         self.deposit(self, date, -reduction_cash, description=description)
 
-    def get_oldest_date(self) -> datetime:
-        return max( chart.get_oldest_date() for chart in self.charts.values() )
+    def get_min_date(self) -> dt.datetime:
+        return max( chart.get_min_date() for chart in self.charts.values() )
     
-    def get_youngest_date(self) -> datetime:
-        return min( chart.get_youngest_date() for chart in self.charts.values() )
+    def get_max_date(self) -> dt.datetime:
+        return min( chart.get_max_date() for chart in self.charts.values() )
 
-    def filter_by_dates(self, start_date: datetime, end_date: datetime):
+    def filter_by_dates(self, start_date: dt.datetime, end_date: dt.datetime):
         self.operations = self.operations[(self.operations['Date'] >= start_date) & (self.operations['Date'] <= end_date)]
     
-    def stats(self):
-        return Statistics(self)
+    def stats(self, min_date: dt.datetime, max_date: dt.datetime):
+        return Statistics(self, min_date, max_date)
         
 
 class Statistics:
-    def __init__(self, portfolio: Portfolio):
-        range_date = { 
-            'start': portfolio.operations.sort_values(by='Date').iloc[0]['Date'].strftime('%Y-%m-%d'),
-            'end': pd.to_datetime('now', utc=True).strftime('%Y-%m-%d')
-        }
+    def __init__(self, portfolio: Portfolio, min_date: dt.datetime, max_date: dt.datetime):
+        # range_date = { 
+        #     'start': portfolio.operations.sort_values(by='Date').iloc[0]['Date'].strftime('%Y-%m-%d'),
+        #     'end': pd.to_datetime('now', utc=True).strftime('%Y-%m-%d')
+        # }
         self._data = pd.DataFrame(
-            index=pd.date_range(start=range_date['start'], end=range_date['end']), 
+            index=pd.date_range(start=min_date, end=max_date), 
             columns=pd.MultiIndex(levels=[[],[]], codes=[[],[]], names=[u'ticker', u'metric'])
         )
 
@@ -77,21 +77,20 @@ class Statistics:
             for column in df_ticker.columns:
                 self._data[ticker, column] = df_ticker[column]  
         
-        self._build_chart()
-        # self._setBalance()
+        
         # self.deposit: float
         # self.fees: float
-        # self.chart: pd.DataFrame
-        # self.annual_return: float
-        # self.yield_to_date: float
-        # self.best_year: str
-        # self.best_year_return: float
-        # self.worst_year: str
-        # self.worst_year_return: float
-        # self.st_deviation: float
-        # self.sharp_ratio: float
-        # self.max_drawdown: float
-        # self.max_drawdown_daterange: str
+        self.total_return: float = 0.0
+        self.annual_return: float = 0.0
+        self.st_deviation: float = 0.0
+        self.sharp_ratio: float = 0.0
+        self.max_drawdown: float = 0.0
+        self.max_drawdown_daterange: str = "2000/01/01 - 2003/01/01"
+        self.best_year: str = "2000"
+        self.best_year_return: float = 0.0
+        self.worst_year: str = "2000"
+        self.worst_year_return: float = 0.0
+        self.chart: self._build_chart()
         
         
     def _build_chart(self):
