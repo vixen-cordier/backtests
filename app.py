@@ -1,14 +1,12 @@
+from typing import List
+
 import streamlit as st
-import datetime as dt
-from typing import List, Dict
-import plotly.graph_objects as go
 st.set_page_config(layout="wide", page_title="Portfolio Backtest")
+import pandas as pd
+pd.options.plotting.backend = "plotly"
 
-from classes.form import Form, read_forms, save_forms
 from classes.portfolio import Portfolio
-from classes.strategies import StrategyType
 import api
-
 
 portfolios: List[Portfolio] = []
 
@@ -18,25 +16,30 @@ portfolios: List[Portfolio] = []
 
     
 with st.sidebar:
-    st.write("Portfolios")
-    portfolios = []
-    for i, form in enumerate(read_forms()):
-        if st.checkbox(form.name, key=f'{i}_checkbox'):
-            portfolios.append(Portfolio(
-                name=form.name,
-                initial_cash=10000,
-                tickers = [ ticker for _, strategy in form.strategies for ticker in strategy.assets ]
-            ))
-    print(len(portfolios), "portfolios")
-    st.markdown("---")
-    min_date, max_date = api.get_date_range(portfolios)
-    date_min = st.date_input("Beginning date", value=min_date, min_value=min_date, max_value=max_date)
-    date_max = st.date_input("Ending date", value=max_date, min_value=min_date, max_value=max_date)
-    # initial_cash = st.number_input("Initial cash", value = 10000)
+  st.write("Portfolios")
+  portfolios = []
+  for i, portfolio in enumerate(api.read_portfolios()):
+    if st.checkbox(portfolio.name, key=f'{i}_checkbox'):
+      portfolios.append(portfolio)
+  print(len(portfolios), "portfolios")
+  
+  st.markdown("---")
+  min_date, max_date = api.get_date_range(portfolios)
+  date_min = st.date_input("Beginning date", value=min_date, min_value=min_date, max_value=max_date)
+  date_max = st.date_input("Ending date", value=max_date, min_value=min_date, max_value=max_date)
+  initial_cash = st.number_input("Initial cash", value = 10000)
             
 
-
-st.dataframe(api.get_portfolios_stats(portfolios, date_min, date_max))
+for portfolio in portfolios:
+  portfolio.deposit(date_min, initial_cash, description="initial deposit")
+  # portfolio.apply_strategies()
+  portfolio.compute_stats(date_min, date_max)
+    
+st.dataframe(api.get_stats(portfolios))
+# fig = go.Figure()
+# for metric in rows:
+#   fig.add_trace(go.Scatter(x=rows[metric].index, y=rows[metric].values, name=metric))
+st.plotly_chart(api.get_charts(portfolios).plot.line(), use_container_width=True)
 
 
 

@@ -5,7 +5,7 @@ import numpy as np
 import datetime
 
 
-class StockChart:
+class TickerChart:
     def __init__(self, ticker='SPY'):
         """ Initialisation of graphic by fetching daily data from yahoo finance API"""
         self.data: pd.DataFrame = yf.Ticker(ticker).history(period='max')[['Close']].tz_localize(None)

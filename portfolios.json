@@ -1,11 +1,12 @@
 [
     {
         "name": "A",
+        "tickers": ["SPY", "SPZ", "QQQ"],
         "strategies": [
             {
                 "percent": 100,
                 "strategy": {
-                    "type": "ALLIN",
+                    "type": "BUYANDHOLD",
                     "assets": { "SPY": 50, "SPZ": 45, "QQQ": 5 }
                 }
             }
@@ -13,19 +14,20 @@
     },
     {
         "name": "B",
+        "tickers": ["SPY", "QQQ"],
         "strategies": [
             {
-                "percent": 100,
+                "percent": 30,
                 "strategy": {
-                    "type": "ALLIN",
+                    "type": "BUYANDHOLD",
                     "assets": { "SPY": 100 }
                 }
             },
             {
-                "percent": 100,
+                "percent": 70,
                 "strategy": {
-                    "type": "DCA",
-                    "freq": "Monthly",
+                    "type": "MOVINGAVERAGE",
+                    "ma": "10",
                     "assets": { "QQQ": 100 }
                 }
             }

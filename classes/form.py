@@ -4,17 +4,16 @@ import datetime as dt
 from typing import List
 
 from classes.portfolio import Portfolio
-from classes.strategies import Strategy, StrategyDCA, StrategyALLIN 
+from classes.strategies import Strategy, StrategyBH, StrategyMA 
 
 CURDIR = os.getcwd()
 
 
 class Form():
-    def __init__(self, name,
-                #  date=dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 
-                 strategies: List[tuple[int, Strategy | StrategyDCA | StrategyALLIN]] = []):
+    def __init__(self, name, tickers: List[str],
+                 strategies: List[tuple[int, Strategy | StrategyBH | StrategyMA]] = []):
         self.name = name
-        # self.date = date
+        self.tickers = tickers
         self.strategies = strategies
         
         # self.portfolio = Portfolio(
@@ -29,6 +28,7 @@ class Form():
         return Form(json['name'], strategies = [
             (
                 strategy_json['percent'],
+                strategy_json['tickers'],
                 Strategy.from_json(strategy_json['strategy'])
             ) for strategy_json in json['strategies'] ]
         )
@@ -42,7 +42,7 @@ class Form():
     def to_json(self) -> dict:
         return {
             "name": self.name,
-            # "date": self.date,
+            "tickers": self.tickers,
             "strategies": [ {
                 "percent": percent,
                 "strategy": strategy.to_json()

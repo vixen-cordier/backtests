@@ -1,68 +1,74 @@
-import  enum
 from typing import Dict
+import  enum
 import datetime
-from classes.portfolio import Portfolio
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+  from classes.portfolio import Portfolio
+
 
 class StrategyType(enum.Enum):
-   ALLIN = 0
-   DCA   = 1
+   BUYANDHOLD = 0
+   MOVINGAVERAGE = 1
 
 
 class Strategy():
-    type = ""
+  type = ""
 
-    @staticmethod
-    def from_json(json):
-        if json['type'] == StrategyType.ALLIN.name:
-            return StrategyALLIN(assets=json['assets'])
-        elif json['type'] == StrategyType.DCA.name:
-            return StrategyDCA(assets=json['assets'], freq=json['freq'])
-        else:
-            return Strategy()
-        
-    def to_json(self):
-        return {}
-
-
-
-class StrategyALLIN(Strategy):
-    type = StrategyType.ALLIN.name
-
-    def __init__(self, assets: Dict[str, int] = {}):
-        self.assets = assets
-
-    def to_json(self):
-        return {
-            "type": self.type,
-            "assets": self.assets
-        }
+  @staticmethod
+  def from_json(json):
+    if json['type'] == StrategyType.BUYANDHOLD.name:
+      return StrategyBH(assets=json['assets'])
+    elif json['type'] == StrategyType.MOVINGAVERAGE.name:
+      return StrategyMA(assets=json['assets'], ma=json['ma'])
+    else:
+      return Strategy()
     
-    def apply(self, portfolio: Portfolio, start_date: datetime):
-        for ticker, percent in self.assets.items():
-            portfolio.buy(start_date, ticker, portfolio.cash*percent/100, description="buy ALLIN")
+  # def apply():
+  #   pass
+  def to_json(self):
+    return {}
+
+
+
+class StrategyBH(Strategy):
+  type = StrategyType.BUYANDHOLD.name
+
+  def __init__(self, assets: Dict[str, int] = {}):
+    self.assets = assets
+
+  def to_json(self):
+    return {
+      "type": self.type,
+      "assets": self.assets
+    }
+  
+  # def apply(self, portfolio, percent_global: int, start_date: datetime):
+  def apply(self, portfolio: Portfolio, percent_global: int, start_date: datetime):
+    for ticker, percent_local in self.assets.items():
+      percent = percent_global/100*percent_local/100
+      portfolio.buy(start_date, ticker, portfolio[portfolio.CASH]*percent, description="buy BUYANDHOLD")
 
 
 
 
-class StrategyDCA(Strategy):
-    type = StrategyType.DCA.name
+class StrategyMA(Strategy):
+  type = StrategyType.MOVINGAVERAGE.name
 
-    def __init__(self, assets: Dict[str, int] = {}, freq="", inflow=0):
-        self.assets = assets
-        self.freq = freq
-        self.inflow = inflow
+  def __init__(self, assets: Dict[str, int] = {}, ma: int = 10):
+    self.assets = assets
+    self.ma = ma
 
-    def to_json(self):
-        return {
-            "type": self.type,
-            "assets": self.assets,
-            "freq": self.freq,
-            "inflow": self.inflow
-        }
-        
-    def apply(self, portfolio: Portfolio, start_date: datetime):
-        pass
-        #     portfolio.deposit(date, self.inflow, description="deposit DCA")
-        # for ticker, percent in self.assets.items():
-        #     portfolio.buy(date, ticker, portfolio.cash*percent/100, description="buy DCA")
+  def to_json(self):
+    return {
+      "type": self.type,
+      "ma": self.ma,
+      "assets": self.assets
+    }
+    
+  def apply(self, portfolio, start_date: datetime):
+    pass
+    #   portfolio.deposit(date, self.inflow, description="deposit MOVINGAVERAGE")
+    # for ticker, percent in self.assets.items():
+    #   portfolio.buy(date, ticker, portfolio.cash*percent/100, description="buy MOVINGAVERAGE")
 
