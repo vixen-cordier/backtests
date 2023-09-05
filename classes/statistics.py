@@ -1,10 +1,11 @@
-import datetime as dt
-import pandas as pd
-import numpy as np
-
+from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from classes.portfolio import Portfolio
+
+import datetime as dt
+import pandas as pd
+import numpy as np
 
 
 
@@ -35,14 +36,18 @@ class Statistics:
             df_ticker['Position'] = position
             df_ticker['Invested'] = invested
             
-            df_ticker = df_ticker.join(portfolio.assets[ticker]['chart'].data).ffill()
+            if ticker == 'CASH':
+                df_ticker['Close'] = 1
+            else:
+                df_ticker = df_ticker.join(portfolio.assets[ticker]['chart'].data).ffill()
+                
             df_ticker['Value'] = df_ticker['Close'] * df_ticker['Position']
 
             for column in df_ticker.columns:
-                print("  ", column)
                 self._data[ticker, column] = df_ticker[column]  
         
-        print(self._data)
+        print(self._data.shape)
+        print(self._data.columns)
         
         
         self.invested: float = 0.0
@@ -59,9 +64,7 @@ class Statistics:
         self.worst_year: str = "2000"
         self.worst_year_return: float = 0.0
         self.chart = self._build_chart()
-        print(self.chart)
         
         
     def _build_chart(self) -> pd.Series:
-        print(self._data)
         return self._data.loc[:, pd.IndexSlice[:, 'Value']].sum(axis=1)

@@ -28,11 +28,15 @@ with st.sidebar:
   date_min = st.date_input("Beginning date", value=min_date, min_value=min_date, max_value=max_date)
   date_max = st.date_input("Ending date", value=max_date, min_value=min_date, max_value=max_date)
   initial_cash = st.number_input("Initial cash", value = 10000)
+  print("app.min_date", type(min_date), min_date)
+  print("app.max_date", type(max_date), max_date)
+  print("app.date_min", type(date_min), date_min)
+  print("app.date_max", type(date_max), date_max)
             
 
 for portfolio in portfolios:
   portfolio.deposit(date_min, initial_cash, description="initial deposit")
-  # portfolio.apply_strategies()
+  portfolio.apply_strategies(date_min)
   portfolio.compute_stats(date_min, date_max)
     
 st.dataframe(api.get_stats(portfolios))

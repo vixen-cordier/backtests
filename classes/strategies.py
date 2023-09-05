@@ -1,11 +1,11 @@
-from typing import Dict
-import  enum
-import datetime
-
+from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
   from classes.portfolio import Portfolio
 
+from typing import Dict
+import  enum
+import datetime
 
 class StrategyType(enum.Enum):
    BUYANDHOLD = 0
@@ -47,7 +47,7 @@ class StrategyBH(Strategy):
   def apply(self, portfolio: Portfolio, percent_global: int, start_date: datetime):
     for ticker, percent_local in self.assets.items():
       percent = percent_global/100*percent_local/100
-      portfolio.buy(start_date, ticker, portfolio[portfolio.CASH]*percent, description="buy BUYANDHOLD")
+      portfolio.buy(start_date, ticker, portfolio.assets['CASH']['quantity']*percent, description="buy BUYANDHOLD")
 
 
 

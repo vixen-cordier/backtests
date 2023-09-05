@@ -33,6 +33,7 @@ def get_date_range(portfolios: List[Portfolio]) -> (dt.datetime, dt.datetime):
   if len(portfolios) > 0:
     min_date = max( ptf.get_min_date() for ptf in portfolios )
     max_date = min( ptf.get_max_date() for ptf in portfolios )
+    print("api.get_date_range", min_date, type(min_date), max_date, type(max_date))
   else:
     min_date = dt.datetime(1900, 1, 1)
     max_date = dt.datetime.now()
