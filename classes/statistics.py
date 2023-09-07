@@ -10,7 +10,6 @@ import numpy as np
 
 
 class Statistics:
-    # def __init__(self, portfolio, min_date: dt.datetime, max_date: dt.datetime):
     def __init__(self, portfolio: Portfolio, min_date: dt.datetime, max_date: dt.datetime):
         # range_date = { 
         #     'start': portfolio.operations.sort_values(by='Date').iloc[0]['Date'].strftime('%Y-%m-%d'),
@@ -20,9 +19,7 @@ class Statistics:
             index=pd.date_range(start=min_date, end=max_date), 
             columns=pd.MultiIndex(levels=[[],[]], codes=[[],[]], names=[u'ticker', u'metric'])
         )
-        print(portfolio.name, portfolio.assets.keys())
         for ticker in np.unique(portfolio.operations['Ticker']):
-            print(" ", ticker)
             df_ticker = pd.DataFrame(index=self._data.index)
             df_operation: pd.DataFrame = portfolio.operations[portfolio.operations['Ticker'] == ticker]
             
@@ -46,8 +43,8 @@ class Statistics:
             for column in df_ticker.columns:
                 self._data[ticker, column] = df_ticker[column]  
         
-        print(self._data.shape)
-        print(self._data.columns)
+        # print(self._data.shape)
+        # print(self._data.columns)
         
         
         self.invested: float = 0.0

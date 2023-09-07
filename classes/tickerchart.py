@@ -10,23 +10,19 @@ class TickerChart:
     """ Initialisation of graphic by fetching daily data from yahoo finance API"""
     self.data: pd.DataFrame = yf.Ticker(ticker).history(period='max')[['Close']].tz_localize(None)
     # self.data.index = pd.to_datetime(self.data.index)#.strftime('%Y-%m-%d')
-    print(f"{ticker} :  {self.data.index[0]} --> {self.data.index[-1]}")
+    print(f"{ticker} :  {self.data.index[0].date()} --> {self.data.index[-1].date()}")
 
   def get_min_date(self) -> datetime: 
-    print("TickerChart.get_min_date :", type(self.data.index[0]), self.data.index[0])
-    return self.data.index[0]
+    return self.data.index[0].date()
   
   def get_max_date(self) -> datetime:
-    print("TickerChart.get_max_date :", type(self.data.index[-1]), self.data.index[-1])
-    return self.data.index[-1]
+    return self.data.index[-1].date()
   
   def get_price(self, date: datetime) -> float:
-    print(self.data.index[0], date, self.data.index[-1])
-    print(date not in self.data.index)
-    # while date not in self.data.index:
+    # while date.strftime('%Y-%m-%d') not in self.data.index.strftime('%Y-%m-%d'):
     #   date -= datetime.timedelta(days=1)
     # print(date)
-    return self.data[self.data.index == date]['Close'].values[0]
+    return self.data[self.data.index.strftime('%Y-%m-%d') == date.strftime('%Y-%m-%d')]['Close'].values[0]
   
 
   def set_flag(self):

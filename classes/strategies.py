@@ -43,11 +43,10 @@ class StrategyBH(Strategy):
       "assets": self.assets
     }
   
-  # def apply(self, portfolio, percent_global: int, start_date: datetime):
   def apply(self, portfolio: Portfolio, percent_global: int, start_date: datetime):
+    cash = portfolio.assets['CASH']['quantity']
     for ticker, percent_local in self.assets.items():
-      percent = percent_global/100*percent_local/100
-      portfolio.buy(start_date, ticker, portfolio.assets['CASH']['quantity']*percent, description="buy BUYANDHOLD")
+      portfolio.buy(start_date, ticker, cash*percent_global/100*percent_local/100, description="buy BUYANDHOLD")
 
 
 
@@ -66,7 +65,7 @@ class StrategyMA(Strategy):
       "assets": self.assets
     }
     
-  def apply(self, portfolio, start_date: datetime):
+  def apply(self, portfolio: Portfolio, percent_global: int, start_date: datetime):
     pass
     #   portfolio.deposit(date, self.inflow, description="deposit MOVINGAVERAGE")
     # for ticker, percent in self.assets.items():

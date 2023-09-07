@@ -1,34 +1,39 @@
 [
     {
-        "name": "A",
-        "tickers": ["SPY", "SPZ", "QQQ"],
+        "name": "SPY",
+        "tickers": ["SPY"],
         "strategies": [
             {
                 "percent": 100,
                 "strategy": {
                     "type": "BUYANDHOLD",
-                    "assets": { "SPY": 50, "SPZ": 45, "QQQ": 5 }
+                    "assets": { "SPY": 100 }
                 }
             }
         ]
     },
     {
-        "name": "B",
+        "name": "QQQ",
+        "tickers": ["QQQ"],
+        "strategies": [
+            {
+                "percent": 100,
+                "strategy": {
+                    "type": "BUYANDHOLD",
+                    "assets": { "QQQ": 100 }
+                }
+            }
+        ]
+    },
+    {
+        "name": "A",
         "tickers": ["SPY", "QQQ"],
         "strategies": [
             {
-                "percent": 30,
+                "percent": 100,
                 "strategy": {
                     "type": "BUYANDHOLD",
-                    "assets": { "SPY": 100 }
-                }
-            },
-            {
-                "percent": 70,
-                "strategy": {
-                    "type": "MOVINGAVERAGE",
-                    "ma": "10",
-                    "assets": { "QQQ": 100 }
+                    "assets": { "SPY": 70, "QQQ": 30 }
                 }
             }
         ]
