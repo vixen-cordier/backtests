@@ -10,7 +10,7 @@ import numpy as np
 
 
 class Statistics:
-    def __init__(self, portfolio: Portfolio, min_date: dt.datetime, max_date: dt.datetime):
+    def __init__(self, portfolio: Portfolio, min_date: dt.date, max_date: dt.date):
         # range_date = { 
         #     'start': portfolio.operations.sort_values(by='Date').iloc[0]['Date'].strftime('%Y-%m-%d'),
         #     'end': pd.to_datetime('now', utc=True).strftime('%Y-%m-%d')
@@ -19,38 +19,44 @@ class Statistics:
             index=pd.date_range(start=min_date, end=max_date), 
             columns=pd.MultiIndex(levels=[[],[]], codes=[[],[]], names=[u'ticker', u'metric'])
         )
-        for ticker in np.unique(portfolio.operations['Ticker']):
-            df_ticker = pd.DataFrame(index=self._data.index)
-            df_operation: pd.DataFrame = portfolio.operations[portfolio.operations['Ticker'] == ticker]
+        tickers = np.unique(portfolio.operations['Ticker'])
+        for ticker in tickers:
+            # print(ticker)
+            df_ticker = pd.DataFrame(index=self._data.index, columns=['Position', 'Invested'])
+            df_ope: pd.DataFrame = portfolio.operations[portfolio.operations['Ticker'] == ticker]
+            df_ope = df_ope.groupby('Date').agg({'Quantity': 'sum', 'Amount': 'sum'})
+            df_ope.index = df_ope.index.astype('datetime64[ns]')
             
-            quantity = df_operation['Quantity'].to_numpy()
-            amount = df_operation['Amount'].to_numpy()
-            position, invested = [], []
-            for idx in range(df_ticker.shape[0]):
-                position.append(np.sum(quantity[:idx+1]))
-                invested.append(np.sum(amount[:idx+1]))
-            
-            df_ticker['Position'] = position
-            df_ticker['Invested'] = invested
-            
+            for idx in df_ope.index:
+                df_ticker.loc[idx, 'Position'] = np.sum(df_ope.loc[:idx, 'Quantity'])
+                df_ticker.loc[idx, 'Invested'] = np.sum(df_ope.loc[:idx, 'Amount'])
+
             if ticker == 'CASH':
                 df_ticker['Close'] = 1
             else:
-                df_ticker = df_ticker.join(portfolio.assets[ticker]['chart'].data).ffill()
-                
-            df_ticker['Value'] = df_ticker['Close'] * df_ticker['Position']
+                df_ticker = df_ticker.join(portfolio.assets[ticker]['chart'].data)
 
-            for column in df_ticker.columns:
-                self._data[ticker, column] = df_ticker[column]  
+            df_ticker = df_ticker.ffill()
+            self._data[ticker, 'Position'] = df_ticker['Position']  
+            self._data[ticker, 'Invested'] = df_ticker['Invested']  
+            self._data[ticker, 'Close'] = df_ticker['Close'] 
+                
+                
+        for ticker in tickers:
+            if ticker != 'CASH':
+                self._data['CASH', 'Position'] -= self._data[ticker, 'Invested'] 
+                self._data['CASH', 'Invested'] -= self._data[ticker, 'Invested'] 
+        for ticker in tickers:
+            self._data[ticker, 'Value'] = self._data[ticker, 'Close'] * self._data[ticker, 'Position'] 
+
+        print(self._data) 
         
-        # print(self._data.shape)
-        # print(self._data.columns)
         
-        
-        self.invested: float = 0.0
-        self.balance: float = 0.0
+        self.invested: float = self._data.loc[pd.Timestamp(max_date), pd.IndexSlice[:, 'Invested']].sum()
+        self.balance: float = self._data.loc[pd.Timestamp(max_date), pd.IndexSlice[:, 'Value']].sum()
         # self.fees: float
-        self.total_return: float = 0.0
+        self.cash: float = self._data.loc[pd.Timestamp(max_date),  pd.IndexSlice['CASH', 'Value']] / self.balance * 100
+        self.total_return: float = self.balance / self.invested * 100
         self.annual_return: float = 0.0
         self.st_deviation: float = 0.0
         self.sharp_ratio: float = 0.0
@@ -60,7 +66,7 @@ class Statistics:
         self.best_year_return: float = 0.0
         self.worst_year: str = "2000"
         self.worst_year_return: float = 0.0
-        self.chart = self._build_chart()
+        self.chart: pd.Series = self._data.loc[:, pd.IndexSlice[:, 'Value']].sum(axis=1)
         
         
     def _build_chart(self) -> pd.Series:

@@ -36,10 +36,23 @@ for portfolio in portfolios:
   portfolio.compute_stats(date_min, date_max)
     
 st.dataframe(api.get_stats(portfolios))
-# fig = go.Figure()
-# for metric in rows:
-#   fig.add_trace(go.Scatter(x=rows[metric].index, y=rows[metric].values, name=metric))
-st.plotly_chart(api.get_charts(portfolios).plot.line(), use_container_width=True)
+portfolios_graph, tickers_graph = st.tabs(["Portfolios", "Tickers"])
+with portfolios_graph:
+  st.plotly_chart(api.get_charts(portfolios).plot.line(), use_container_width=True)
+with tickers_graph:
+  # if st.checkbox("Compare tickers in same axis"):
+  ticker_data = api.get_ticker_charts(portfolios, same_axis=True)
+  st.plotly_chart(ticker_data.plot.line(), use_container_width=True)
+  # else:
+  #   st.plotly_chart(api.get_ticker_charts(portfolios).plot.line(), use_container_width=True)
+
+with st.expander("Operations details"):
+  # portfolio = st.radio("Portfolio selection:", [p.name for p in portfolios], horizontal=True, label_visibility='hidden')
+  # print(portfolio)
+  st.dataframe(api.get_porfolios_operations(portfolios))
+  # fig = go.Figure()
+  # for metric in rows:
+  #   fig.add_trace(go.Scatter(x=rows[metric].index, y=rows[metric].values, name=metric))
 
 
 

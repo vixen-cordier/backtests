@@ -2,27 +2,27 @@ from typing import List
 import yfinance as yf
 import pandas as pd
 import numpy as np
-import datetime
+import datetime as dt
 
 
 class TickerChart:
   def __init__(self, ticker='SPY'):
     """ Initialisation of graphic by fetching daily data from yahoo finance API"""
-    self.data: pd.DataFrame = yf.Ticker(ticker).history(period='max')[['Close']].tz_localize(None)
-    # self.data.index = pd.to_datetime(self.data.index)#.strftime('%Y-%m-%d')
-    print(f"{ticker} :  {self.data.index[0].date()} --> {self.data.index[-1].date()}")
+    # self.data: pd.DataFrame = yf.Ticker(ticker).history(period='max')[['Close']].tz_localize(None)
+    self.data = pd.read_csv(f'.dev/{ticker}.csv').astype({'Date': 'datetime64[ns]'}).sort_values('Date').set_index('Date')
+    print(f"{ticker} :  {self.data.index[0].date()} --> {self.data.index[-1].date()}") 
 
-  def get_min_date(self) -> datetime: 
+  def get_min_date(self) -> dt.date: 
     return self.data.index[0].date()
   
-  def get_max_date(self) -> datetime:
+  def get_max_date(self) -> dt.date:
     return self.data.index[-1].date()
   
-  def get_price(self, date: datetime) -> float:
+  def get_price(self, date: dt.date) -> float:
     # while date.strftime('%Y-%m-%d') not in self.data.index.strftime('%Y-%m-%d'):
     #   date -= datetime.timedelta(days=1)
     # print(date)
-    return self.data[self.data.index.strftime('%Y-%m-%d') == date.strftime('%Y-%m-%d')]['Close'].values[0]
+    return self.data[self.data.index == pd.Timestamp(date)]['Close'].values[0]
   
 
   def set_flag(self):
