@@ -10,7 +10,7 @@ class TickerChart:
     """ Initialisation of graphic by fetching daily data from yahoo finance API"""
     # self.data: pd.DataFrame = yf.Ticker(ticker).history(period='max')[['Close']].tz_localize(None)
     self.data = pd.read_csv(f'.dev/{ticker}.csv').astype({'Date': 'datetime64[ns]'}).sort_values('Date').set_index('Date')
-    print(f"{ticker} :  {self.data.index[0].date()} --> {self.data.index[-1].date()}") 
+    # print(f"{ticker} :  {self.data.index[0].date()} --> {self.data.index[-1].date()}") 
 
   def get_min_date(self) -> dt.date: 
     return self.data.index[0].date()
@@ -19,9 +19,9 @@ class TickerChart:
     return self.data.index[-1].date()
   
   def get_price(self, date: dt.date) -> float:
-    # while date.strftime('%Y-%m-%d') not in self.data.index.strftime('%Y-%m-%d'):
-    #   date -= datetime.timedelta(days=1)
-    # print(date)
+    while pd.Timestamp(date) not in self.data.index:
+      date -= dt.timedelta(days=1)
+      print(date)
     return self.data[self.data.index == pd.Timestamp(date)]['Close'].values[0]
   
 
@@ -96,5 +96,6 @@ class TickerChart:
         print(f"date={date}, data_rsi.at[date, col_rsi]={data_rsi.at[date, col_rsi]}")
     self.data[col_rsi] = pd.concat([self.data, data_rsi[[col_rsi]]], axis=1).bfill()[col_rsi]
     # print(data_rsi.tail(60))
+
 
 

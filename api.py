@@ -40,23 +40,23 @@ def get_date_range(portfolios: List[Portfolio]) -> (dt.date, dt.date):
 
 
 def get_stats(portfolios: List[Portfolio]) -> pd.DataFrame:
-  ptfs_stats = pd.DataFrame(columns=['Invested', 'Balance', 'Cash', 'Total return', 'Annual return', 'St deviation', 'Sharp ratio', 'Max drawdown', 
+  ptfs_stats = pd.DataFrame(columns=['Invested', 'Balance', 'Annual return', 'St deviation', 'Sharp ratio', 'Max drawdown', 
                                      'Max drawdown daterange', 'Best year', 'Best year return', 'Worst year', 'Worst year return'])
   for portfolio in portfolios:
     ptfs_stats.loc[portfolio.name] = {
-      'Invested': portfolio.stats.invested,
-      'Balance': portfolio.stats.balance,
-      'Cash': portfolio.stats.cash,
-      'Total return': portfolio.stats.total_return,
-      'Annual return': portfolio.stats.annual_return,
-      'St deviation': portfolio.stats.st_deviation,
-      'Sharp ratio': portfolio.stats.sharp_ratio,
-      'Max drawdown': portfolio.stats.max_drawdown,
+      'Invested': "{:.0f} €".format(portfolio.stats.invested),
+      'Balance': "{:.0f} €".format(portfolio.stats.balance),
+      # 'Cash': "{:.2f} %".format(portfolio.stats.cash*100),
+      # 'Total return': "{:.2f} %".format(portfolio.stats.total_return*100),
+      'Annual return': "{:.2f} %".format(portfolio.stats.annual_return*100),
+      'St deviation': "{:.2f} %".format(portfolio.stats.annual_stdev*100),
+      'Sharp ratio': "{:.2f}".format(portfolio.stats.sharp_ratio),
+      'Max drawdown': "{:.2f} %".format(portfolio.stats.max_drawdown*100),
       'Max drawdown daterange': portfolio.stats.max_drawdown_daterange,
       'Best year': portfolio.stats.best_year,
-      'Best year return': portfolio.stats.best_year_return,
+      'Best year return': "{:.2f} %".format(portfolio.stats.best_year_return*100),
       'Worst year': portfolio.stats.worst_year,
-      'Worst year return': portfolio.stats.worst_year_return,
+      'Worst year return': "{:.2f} %".format(portfolio.stats.worst_year_return*100),
     }
 
   return ptfs_stats

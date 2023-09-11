@@ -1,5 +1,18 @@
 [
     {
+        "name": "SPY",
+        "tickers": ["SPY"],
+        "strategies": [
+            {
+                "percent": 100,
+                "strategy": {
+                    "type": "BUYANDHOLD",
+                    "assets": { "SPY": 100 }
+                }
+            }
+        ]
+    },
+    {
         "name": "70/30",
         "tickers": ["SPY", "QQQ"],
         "strategies": [
