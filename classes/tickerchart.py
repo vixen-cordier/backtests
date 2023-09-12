@@ -25,6 +25,20 @@ class TickerChart:
     return self.data[self.data.index == pd.Timestamp(date)]['Close'].values[0]
   
 
+  def get_timeframe(self, time) -> pd.Series:
+    data_tf = pd.Series(self.data.iloc[-1]['Close'], index=[self.data.index[-1]])
+    for i in range(self.data.shape[0]-1):
+      curr_date: dt.date = self.data.index[i]
+      next_date: dt.date = self.data.index[i+1]
+      if time == 'Daily' and curr_date.day != next_date.day       \
+      or time == 'Weekly' and curr_date.week != next_date.week    \
+      or time == 'Monthly' and curr_date.month != next_date.month \
+      or time == 'Annually' and curr_date.year != next_date.year:
+      # print(curr_date, next_date)
+        data_tf = pd.concat((data_tf, pd.Series(self.data.iloc[i]['Close'], index=[self.data.index[i]])))
+    return data_tf.sort_index()
+
+
   def set_flag(self):
     """ Flags end of Week and end of Month """
     self.data['Closure_Daily'] = False

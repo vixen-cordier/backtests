@@ -50,23 +50,27 @@ class Statistics:
 
         # print(self.data) 
         self.chart: pd.Series = self.data.loc[:, pd.IndexSlice[:, 'Value']].sum(axis=1)
+        self.annual_returns = self.get_timeframe(time='Annually').pct_change().fillna(0)
+        
         self.invested: float = self.data.loc[pd.Timestamp(max_date), pd.IndexSlice[:, 'Invested']].sum()
         self.balance: float = self.data.loc[pd.Timestamp(max_date), pd.IndexSlice[:, 'Value']].sum()
         # self.fees: float
         self.cash: float = self.data.loc[pd.Timestamp(max_date),  pd.IndexSlice['CASH', 'Value']] / self.balance
         self.total_return: float = (self.balance - self.invested) / self.invested
-        self.annual_return: float = (1+self.total_return)**(365/(max_date-min_date).days) - 1
-        self.annual_stdev: float = self.chart.pct_change().std()*np.sqrt(260)
-        self.sharp_ratio: float = self.annual_return / self.annual_stdev
+        self.annualized_return: float = (1+self.total_return)**(365/(max_date-min_date).days) - 1
+        self.annualized_stdev: float = self.chart.pct_change().std()*np.sqrt(260)
+        self.sharp_ratio: float = self.annualized_return / self.annualized_stdev
+        
         self.max_drawdown: float = 0.0
         self.max_drawdown_daterange: str = "2000/01/01 - 2003/01/01"
-        self.best_year: str = "2000"
-        self.best_year_return: float = 0.0
-        self.worst_year: str = "2000"
-        self.worst_year_return: float = 0.0
+        self.best_year_return: float = max(self.annual_returns)
+        self.best_year: str = self.annual_returns[self.annual_returns == self.best_year_return].index[0].year
+        self.worst_year_return: float = min(self.annual_returns)
+        self.worst_year: str = self.annual_returns[self.annual_returns == self.worst_year_return].index[0].year
         
         
-    def get_timeframe(self, time) -> pd.DataFrame:
+        
+    def get_timeframe(self, time) -> pd.Series:
         chart_tf = pd.Series(self.chart[-1], index=[self.chart.index[-1]])
         for i in range(self.chart.shape[0]-1):
             curr_date: dt.date = self.chart.index[i]

@@ -39,27 +39,29 @@ def get_date_range(portfolios: List[Portfolio]) -> (dt.date, dt.date):
   return min_date, max_date
 
 
+
 def get_stats(portfolios: List[Portfolio]) -> pd.DataFrame:
-  ptfs_stats = pd.DataFrame(columns=['Invested', 'Balance', 'Annual return', 'St deviation', 'Sharp ratio', 'Max drawdown', 
+  ptfs_stats = pd.DataFrame(columns=['Portfolio', 'Invested', 'Balance', 'Annual return', 'St deviation', 'Sharp ratio', 'Max drawdown', 
                                      'Max drawdown daterange', 'Best year', 'Best year return', 'Worst year', 'Worst year return'])
-  for portfolio in portfolios:
-    ptfs_stats.loc[portfolio.name] = {
+  for i, portfolio in enumerate(portfolios):
+    ptfs_stats.loc[i] = {
+      'Portfolio': portfolio.name,
       'Invested': "{:.0f} €".format(portfolio.stats.invested),
       'Balance': "{:.0f} €".format(portfolio.stats.balance),
       # 'Cash': "{:.2f} %".format(portfolio.stats.cash*100),
       # 'Total return': "{:.2f} %".format(portfolio.stats.total_return*100),
-      'Annual return': "{:.2f} %".format(portfolio.stats.annual_return*100),
-      'St deviation': "{:.2f} %".format(portfolio.stats.annual_stdev*100),
+      'Annual return': "{:.2f} %".format(portfolio.stats.annualized_return*100),
+      'St deviation': "{:.2f} %".format(portfolio.stats.annualized_stdev*100),
       'Sharp ratio': "{:.2f}".format(portfolio.stats.sharp_ratio),
       'Max drawdown': "{:.2f} %".format(portfolio.stats.max_drawdown*100),
       'Max drawdown daterange': portfolio.stats.max_drawdown_daterange,
-      'Best year': portfolio.stats.best_year,
       'Best year return': "{:.2f} %".format(portfolio.stats.best_year_return*100),
-      'Worst year': portfolio.stats.worst_year,
+      'Best year': portfolio.stats.best_year,
       'Worst year return': "{:.2f} %".format(portfolio.stats.worst_year_return*100),
+      'Worst year': portfolio.stats.worst_year,
     }
-
   return ptfs_stats
+
 
 
 def get_charts(portfolios: List[Portfolio]) -> pd.DataFrame:
@@ -70,7 +72,7 @@ def get_charts(portfolios: List[Portfolio]) -> pd.DataFrame:
   return ptfs_charts
 
 
-def get_ticker_charts(portfolios: List[Portfolio], same_axis=False) -> pd.DataFrame:
+def get_ticker_charts(portfolios: List[Portfolio], same_axis=True) -> pd.DataFrame:
   tickers_charts = pd.DataFrame()
   min_dates, max_dates = [], []
   if len(portfolios) != 0:
@@ -94,6 +96,41 @@ def get_ticker_charts(portfolios: List[Portfolio], same_axis=False) -> pd.DataFr
       tickers_charts = tickers_charts[[ ticker for ticker in tickers_charts.columns if '%' in ticker ]]
   # print(tickers_charts)
   return tickers_charts
+
+
+
+def get_annual_returns(portfolios: List[Portfolio]) -> pd.DataFrame:
+  ptfs_returns = pd.DataFrame()
+  for portfolio in portfolios:
+    ptfs_returns[portfolio.name] = portfolio.stats.annual_returns
+  # print(ptfs_charts)
+  return ptfs_returns
+
+
+def get_ticker_annual_returns(portfolios: List[Portfolio]) -> pd.DataFrame:
+  tickers_returns = pd.DataFrame()
+  min_dates, max_dates = [], []
+  if len(portfolios) != 0:
+    for portfolio in portfolios:
+      # print(portfolio)
+      for ticker in portfolio.assets.keys():
+        # print(ticker)
+        if ticker not in ["CASH", *tickers_returns.columns]:
+          tickerchart = portfolio.assets[ticker]['chart']
+          min_dates.append(tickerchart.get_min_date())
+          max_dates.append(tickerchart.get_max_date())
+          tickers_returns[f"{ticker}%"] = tickerchart.get_timeframe(time='Annually').pct_change().fillna(0)
+    tickers_returns: pd.DataFrame = tickers_returns[
+      (tickers_returns.index > pd.Timestamp(max(min_dates))) &
+      (tickers_returns.index < pd.Timestamp(min(max_dates)))
+    ]
+    # for ticker in tickers_returns:
+    #   ref_value = tickers_returns.iloc[0][ticker]
+    #   tickers_returns[f"{ticker}%"] = tickers_returns[ticker].apply(lambda cur_value: (cur_value - ref_value)/ref_value*100)
+    # tickers_returns = tickers_returns[[ ticker for ticker in tickers_returns.columns if '%' in ticker ]]
+  # print(tickers_charts)
+  return tickers_returns
+
 
 
 def get_porfolios_operations(portfolios: List[Portfolio]) -> pd.DataFrame:
