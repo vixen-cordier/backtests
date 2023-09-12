@@ -4,7 +4,9 @@ import streamlit as st
 st.set_page_config(layout="wide", page_title="Portfolio Backtest")
 import pandas as pd
 import plotly.express as px
-pd.options.plotting.backend = "plotly"
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+# pd.options.plotting.backend = "plotly"
 
 from classes.portfolio import Portfolio
 import api
@@ -39,10 +41,16 @@ for portfolio in portfolios:
 st.dataframe(api.get_stats(portfolios), use_container_width=True, hide_index=True)
 portfolios_graph, tickers_graph = st.tabs(["Portfolios", "Tickers"])
 with portfolios_graph:
+  # fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.02)
+  # fig.add_trace(go.Scatter(api.get_charts(portfolios).to_dict()), row=1, col=1)
+  # fig.add_trace(go.Scatter(api.get_drawdowns(portfolios).to_dict()), row=2, col=1)
+  # st.plotly_chart(fig, use_container_width=True)
   st.plotly_chart(px.line(api.get_charts(portfolios)), use_container_width=True)
+  st.plotly_chart(px.line(api.get_drawdowns(portfolios)), use_container_width=True)
   st.plotly_chart(px.bar(api.get_annual_returns(portfolios), barmode='group'), use_container_width=True)
 with tickers_graph:
   st.plotly_chart(px.line(api.get_ticker_charts(portfolios)), use_container_width=True)
+  st.plotly_chart(px.line(api.get_ticker_drawdowns(portfolios)), use_container_width=True)
   st.plotly_chart(px.bar(api.get_ticker_annual_returns(portfolios), barmode='group'), use_container_width=True)
 
 with st.expander("Operations details"):

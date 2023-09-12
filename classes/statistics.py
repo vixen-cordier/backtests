@@ -50,7 +50,7 @@ class Statistics:
 
         # print(self.data) 
         self.chart: pd.Series = self.data.loc[:, pd.IndexSlice[:, 'Value']].sum(axis=1)
-        self.annual_returns = self.get_timeframe(time='Annually').pct_change().fillna(0)
+        self.annual_returns: pd.Series = self.chart_timeframe(time='Annually').pct_change().fillna(0)
         
         self.invested: float = self.data.loc[pd.Timestamp(max_date), pd.IndexSlice[:, 'Invested']].sum()
         self.balance: float = self.data.loc[pd.Timestamp(max_date), pd.IndexSlice[:, 'Value']].sum()
@@ -61,8 +61,10 @@ class Statistics:
         self.annualized_stdev: float = self.chart.pct_change().std()*np.sqrt(260)
         self.sharp_ratio: float = self.annualized_return / self.annualized_stdev
         
-        self.max_drawdown: float = 0.0
-        self.max_drawdown_daterange: str = "2000/01/01 - 2003/01/01"
+        self.drawdown: pd.Series = (self.chart - self.chart.cummax()) / self.chart.cummax()
+        self.max_drawdown: float = min(self.drawdown)
+        self.max_drawdown_daterange: str = self.get_max_drawdown_daterange()
+        
         self.best_year_return: float = max(self.annual_returns)
         self.best_year: str = self.annual_returns[self.annual_returns == self.best_year_return].index[0].year
         self.worst_year_return: float = min(self.annual_returns)
@@ -70,7 +72,7 @@ class Statistics:
         
         
         
-    def get_timeframe(self, time) -> pd.Series:
+    def chart_timeframe(self, time) -> pd.Series:
         chart_tf = pd.Series(self.chart[-1], index=[self.chart.index[-1]])
         for i in range(self.chart.shape[0]-1):
             curr_date: dt.date = self.chart.index[i]
@@ -82,4 +84,9 @@ class Statistics:
             # print(curr_date, next_date)
                 chart_tf = pd.concat((chart_tf, pd.Series(self.chart[i], index=[self.chart.index[i]])))
         return chart_tf.sort_index()
-    
+        
+        
+    def get_max_drawdown_daterange(self) -> str:
+        date_max_dd = self.drawdown[self.drawdown==self.max_drawdown].index[0]
+        dd_0 = self.drawdown[self.drawdown==0]
+        return str(dd_0.index[dd_0.index < date_max_dd][-1].date()) + ' - ' + str(dd_0.index[dd_0.index > date_max_dd][0].date())
